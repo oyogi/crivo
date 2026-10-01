@@ -1,0 +1,26 @@
+[build-system]
+requires = ["setuptools>=77"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "crivo-pt"
+version = "0.2.0"
+description = "Classificação de avaliações em português com opção de revisão humana"
+requires-python = ">=3.12"
+dependencies = ["numpy==2.5.4", "scipy==1.18.1", "scikit-learn==1.9.1"]
+
+[dependency-groups]
+dev = ["pytest==9.2.0", "matplotlib>=3.10,<4"]
+
+[project.scripts]
+crivo = "crivo.__main__:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+crivo = ["demo.html"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]
