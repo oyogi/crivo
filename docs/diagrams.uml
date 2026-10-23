@@ -1,0 +1,35 @@
+@startuml architecture
+title Crivo · fluxo do experimento
+skinparam monochrome true
+skinparam shadowing false
+skinparam defaultFontName SansSerif
+skinparam defaultFontSize 13
+skinparam activity {
+  BackgroundColor #F7F7F7
+  BorderColor #333333
+  FontColor #222222
+  DiamondBackgroundColor #FFFFFF
+  DiamondBorderColor #333333
+}
+skinparam ArrowColor #555555
+start
+partition "treino e avaliação" {
+  :B2W-Reviews01 + SHA-256\nlimpeza e divisão por produto (70/15/15);
+  :treino: ajustar TF-IDF e regressões\nC = 0.5, 2, 8;
+  :validação: escolher C pelo macro-F1\ne limiar por erro × cobertura;
+  :teste: avaliar modelo e limiar congelados\nnota 3: apenas diagnóstico;
+  :salvar modelo, limiar,\nmétricas e sinais de referência;
+}
+
+partition "inferência local" {
+  :receber texto pela CLI ou demo;
+  :transformar com o vocabulário\ncongelado e calcular o score;
+  if (há termos conhecidos\ne score ≥ limiar?) then (sim)
+    :classificar como\npositiva ou negativa;
+  else (não)
+    :encaminhar para revisão;
+  endif
+  :mostrar decisão, score\ne contribuições dos termos;
+}
+stop
+@enduml
