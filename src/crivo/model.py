@@ -6,17 +6,34 @@ import re
 import numpy as np
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.linear_model import LogisticRegression
-from sklearn.pipeline import Pipeline
+from sklearn.pipeline import FeatureUnion, Pipeline
 
 LABELS = ("negativa", "positiva")
 
 
-def build_model(c: float = 2.0) -> Pipeline:
+MODEL_CANDIDATES = [
+    {"name": "word40-c8", "c": 8.0, "max_features": 40000, "min_df": 3, "ngram_range": (1, 2)},
+    {"name": "word100-c4", "c": 4.0, "max_features": 100000, "min_df": 2, "ngram_range": (1, 2)},
+    {"name": "word100-c8", "c": 8.0, "max_features": 100000, "min_df": 2, "ngram_range": (1, 2)},
+    {"name": "word150-c8", "c": 8.0, "max_features": 150000, "min_df": 2, "ngram_range": (1, 2)},
+    {"name": "trigram100-c8", "c": 8.0, "max_features": 100000, "min_df": 2, "ngram_range": (1, 3)},
+    {"name": "word-char-c4", "c": 4.0, "max_features": 60000, "min_df": 3, "ngram_range": (1, 2), "char": True},
+]
+
+
+def build_model(c: float = 2.0, max_features=40000, min_df=3, ngram_range=(1, 2), char=False) -> Pipeline:
+    features = TfidfVectorizer(
+        strip_accents="unicode", ngram_range=ngram_range, min_df=min_df,
+        max_features=max_features, sublinear_tf=True,
+    )
+    if char:
+        characters = TfidfVectorizer(analyzer="char_wb", ngram_range=(3, 5),
+                                    strip_accents="unicode", min_df=3,
+                                    max_features=50000, sublinear_tf=True)
+        features = FeatureUnion([("word", features), ("char", characters)],
+                                transformer_weights={"word": 1.0, "char": 0.65})
     return Pipeline([
-        ("tfidf", TfidfVectorizer(
-            strip_accents="unicode", ngram_range=(1, 2), min_df=3,
-            max_features=40000, sublinear_tf=True,
-        )),
+        ("tfidf", features),
         ("classifier", LogisticRegression(C=c, solver="liblinear", max_iter=500, random_state=42)),
     ])
 
@@ -69,28 +86,34 @@ def select_threshold(labels, probabilities, known, target_error=0.10, min_accept
     return selected, curve
 
 
+def _contributions(model, vector, names, limit):
+    contributions = vector.data * model["classifier"].coef_[0, vector.indices]
+    order = np.argsort(-np.abs(contributions))[:limit]
+    return [{"termo": str(names[vector.indices[i]]), "peso": round(float(contributions[i]), 4),
+             "direcao": "positiva" if contributions[i] > 0 else "negativa"} for i in order]
+
+
 def explain(model: Pipeline, text: str, limit: int = 5) -> list[dict]:
     vector = model["tfidf"].transform([text]).tocsr()
-    contributions = vector.data * model["classifier"].coef_[0, vector.indices]
-    names = model["tfidf"].get_feature_names_out()
-    order = np.argsort(-np.abs(contributions))[:limit]
-    return [{"termo": names[vector.indices[i]], "peso": round(float(contributions[i]), 4),
-             "direcao": "positiva" if contributions[i] > 0 else "negativa"} for i in order]
+    return _contributions(model, vector, model["tfidf"].get_feature_names_out(), limit)
 
 
 def predict(bundle: dict, text: str) -> dict:
     if not isinstance(text, str) or len(text) > 10000:
         raise ValueError("envie um texto com até 10 mil caracteres")
     model = bundle["model"]
-    probabilities, known = score_texts(model, [text])
-    probability = float(probabilities[0])
+    vector = model["tfidf"].transform([text]).tocsr()
+    probability = float(model["classifier"].predict_proba(vector)[0, 1])
+    known = vector.nnz > 0
+    if "feature_names" not in bundle:
+        bundle["feature_names"] = model["tfidf"].get_feature_names_out()
     score = max(probability, 1 - probability)
-    accepted = bool(known[0] and score >= bundle["threshold"])
-    reason = "score_suficiente" if accepted else "score_baixo" if known[0] else "sem_vocabulario"
+    accepted = bool(known and score >= bundle["threshold"])
+    reason = "score_suficiente" if accepted else "score_baixo" if known else "sem_vocabulario"
     return {
         "decisao": LABELS[int(probability >= 0.5)] if accepted else "revisar",
         "score": round(score, 4), "motivo": reason,
-        "limiar": bundle["threshold"], "termos": explain(model, text),
+        "limiar": bundle["threshold"], "termos": _contributions(model, vector, bundle["feature_names"], 5),
     }
 
 

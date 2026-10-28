@@ -105,3 +105,18 @@ def test_batch_rejects_empty_input_and_reports_unknown_text(fitted_model):
 def test_predict_rejects_invalid_input(fitted_model, text):
     with pytest.raises(ValueError, match="até 10 mil"):
         predict({"model": fitted_model, "threshold": 0.8}, text)
+
+
+def test_prediction_reuses_features_and_caches_names(fitted_model):
+    from unittest.mock import patch
+    bundle = {"model": fitted_model, "threshold": 0.8}
+    vectorizer = fitted_model["tfidf"]
+    with patch.object(vectorizer, "transform", wraps=vectorizer.transform) as transform, \
+         patch.object(vectorizer, "get_feature_names_out", wraps=vectorizer.get_feature_names_out) as names:
+        first = predict(bundle, "ótimo produto")
+        second = predict(bundle, "ótimo produto")
+    assert first == second
+    assert transform.call_count == 2
+    assert names.call_count == 1
+    expected = fitted_model.predict_proba(["ótimo produto"])[0]
+    assert first["score"] == pytest.approx(max(expected), abs=0.00005)

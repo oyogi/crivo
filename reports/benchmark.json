@@ -1,0 +1,10 @@
+{
+  "repetitions": 500,
+  "texts": 200,
+  "median_ms": 0.4003,
+  "p95_ms": 0.5008,
+  "mean_ms": 0.4122,
+  "python": "3.14.8",
+  "model_bytes": 5076140,
+  "scope": "cpu local, sem http, depois de aquecer; mesma amostra de 200 textos"
+}

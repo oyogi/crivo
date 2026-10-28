@@ -16,7 +16,7 @@ from sklearn.dummy import DummyClassifier
 from sklearn.metrics import accuracy_score, confusion_matrix, f1_score, recall_score
 
 from .data import SOURCE_REVISION, SOURCE_SHA256, partition, prepare, sha256
-from .model import batch_signals, build_model, policy_metrics, score_texts, select_threshold, word_count
+from .model import batch_signals, build_model, policy_metrics, score_texts, select_threshold, word_count, MODEL_CANDIDATES
 
 
 def write_json(path: Path, value) -> None:
@@ -46,16 +46,18 @@ def run(csv_path: Path, artifacts: Path, reports: Path, target_error: float = 0.
               for key in ("train", "validation", "test")}
     if any(len(np.unique(target)) != 2 for target in labels.values()):
         raise ValueError("cada conjunto binário precisa conter as duas classes")
-    best_model, best_f1 = None, -1.0
+    best_model, best_rank, selected_config = None, (-1.0, -1.0), None
     experiments = []
-    for c in (0.5, 2.0, 8.0):
-        model = build_model(c)
+    for config in MODEL_CANDIDATES:
+        model = build_model(**{key: value for key, value in config.items() if key != "name"})
         model.fit(texts["train"], labels["train"])
-        val_proba, _ = score_texts(model, texts["validation"])
+        val_proba, known = score_texts(model, texts["validation"])
         score = float(f1_score(labels["validation"], val_proba >= 0.5, average="macro"))
-        experiments.append({"C": c, "validation_macro_f1": score})
-        if score > best_f1:
-            best_model, best_f1 = model, score
+        policy, _ = select_threshold(labels["validation"], val_proba, known, target_error=target_error)
+        rank = (score, policy["coverage"])
+        experiments.append({"config": config, "validation_macro_f1": score, "validation_policy": policy})
+        if rank > best_rank:
+            best_model, best_rank, selected_config = model, rank, config
     model = best_model
     val_proba, val_known = score_texts(model, texts["validation"])
     selected, _ = select_threshold(labels["validation"], val_proba, val_known, target_error=target_error)
@@ -85,7 +87,7 @@ def run(csv_path: Path, artifacts: Path, reports: Path, target_error: float = 0.
         "cleaning": cleaning, "splits": split_summary,
         "split_row_sha256": {key: hashlib.sha256("\n".join(str(r.row) for r in rows).encode()).hexdigest() for key, rows in parts.items()},
         "experiments": experiments, "selected_C": model["classifier"].C,
-        "target_error": target_error,
+        "target_error": target_error, "selected_config": selected_config,
         "validation_policy": selected,
         "test": {"baseline": classification_metrics(labels["test"], baseline),
                  "forced": classification_metrics(labels["test"], predictions),
@@ -94,7 +96,7 @@ def run(csv_path: Path, artifacts: Path, reports: Path, target_error: float = 0.
         "monitor_reference": reference,
         "environment": {"python": platform.python_version(), "sklearn": sklearn.__version__,
                         "numpy": np.__version__, "scipy": scipy.__version__},
-        "vocabulary_size": len(model["tfidf"].vocabulary_),
+        "vocabulary_size": len(model["classifier"].coef_[0]),
         "training_seconds": round(time.perf_counter() - started, 3),
     }
     artifacts.mkdir(parents=True, exist_ok=True)
@@ -151,8 +153,8 @@ com pelo menos 100 aceites. Isso é um critério de seleção, não uma garantia
 de acurácia futura. Selecionar modelo e limiar na mesma validação também
 introduz otimismo; o teste separado é a checagem que falta nessa seleção.
 
-Foram testados C=0.5, 2 e 8; venceu C={result['selected_C']:g} pelo macro-F1
-na validação. O vocabulário tem {result['vocabulary_size']:,} features.
+Foram comparadas seis configurações; venceu {result['selected_config']['name']} pelo macro-F1
+na validação, com cobertura como desempate. O vocabulário tem {result['vocabulary_size']:,} features.
 Tempo da execução: {result['training_seconds']:.1f}s, sem incluir download.
 
 No diagnóstico de três estrelas, {result['three_star_diagnostic']['review_rate']:.2%}

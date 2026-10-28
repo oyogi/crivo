@@ -1,0 +1,16 @@
+{
+  "resampling_unit": "product_id",
+  "replicates": 2000,
+  "seed": 42,
+  "products": 6395,
+  "baseline_wrong_winner_right": 84,
+  "baseline_right_winner_wrong": 52,
+  "paired_accuracy_delta_95_percentile": [
+    0.0005080237522251202,
+    0.003295315740861303
+  ],
+  "paired_macro_f1_delta_95_percentile": [
+    0.0006366837480409893,
+    0.0040010801904319625
+  ]
+}

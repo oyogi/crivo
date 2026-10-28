@@ -1,0 +1,318 @@
+{
+  "protocol": {
+    "candidates": [
+      {
+        "id": "baseline-word40-c8",
+        "word_ngram": 2,
+        "word_min_df": 3,
+        "word_max_features": 40000,
+        "C": 8.0
+      },
+      {
+        "id": "word100-c4",
+        "word_ngram": 2,
+        "word_min_df": 2,
+        "word_max_features": 100000,
+        "C": 4.0
+      },
+      {
+        "id": "word100-c8",
+        "word_ngram": 2,
+        "word_min_df": 2,
+        "word_max_features": 100000,
+        "C": 8.0
+      },
+      {
+        "id": "word150-c8",
+        "word_ngram": 2,
+        "word_min_df": 2,
+        "word_max_features": 150000,
+        "C": 8.0
+      },
+      {
+        "id": "trigram100-c8",
+        "word_ngram": 3,
+        "word_min_df": 2,
+        "word_max_features": 100000,
+        "C": 8.0
+      },
+      {
+        "id": "word-char-c4",
+        "word_ngram": 2,
+        "word_min_df": 3,
+        "word_max_features": 60000,
+        "C": 4.0,
+        "char": true
+      }
+    ],
+    "selection": "maximum validation macro-F1; tie broken by higher validation coverage",
+    "test_access": "after selection.json is written",
+    "target_validation_error_upper": 0.02,
+    "split_sha256": {
+      "train": "938f95f69c51101249889f552b0732de1488596764bdfa940b2380fe740328ae",
+      "validation": "a9c62bafd3f4af4c874a308046df7045345234a6554123b906d698a4bed98a82",
+      "test": "c821255203efad6576c9591c5b8220766e718a931c1b061c0251f4f0828ea83e",
+      "three_star_test": "6816f3f0b148220edd45fde1316ac78d5584c47b8f54e23988c4e2baac44b48e"
+    }
+  },
+  "validation": [
+    {
+      "config": {
+        "id": "baseline-word40-c8",
+        "word_ngram": 2,
+        "word_min_df": 3,
+        "word_max_features": 40000,
+        "C": 8.0
+      },
+      "fit_seconds": 2.8551055409989203,
+      "validation_macro_f1": 0.9459349991282217,
+      "validation_accuracy": 0.954620210757142,
+      "validation_policy": {
+        "threshold": 0.81,
+        "accepted": 14780,
+        "errors": 255,
+        "coverage": 0.9002862886032771,
+        "error_rate": 0.01725304465493911,
+        "wilson_upper_95": 0.01948125002116993,
+        "negative_coverage": 0.8238498789346247,
+        "positive_coverage": 0.933339150161417
+      },
+      "features": 40000
+    },
+    {
+      "config": {
+        "id": "word100-c4",
+        "word_ngram": 2,
+        "word_min_df": 2,
+        "word_max_features": 100000,
+        "C": 4.0
+      },
+      "fit_seconds": 2.7606568400005926,
+      "validation_macro_f1": 0.9451462947916424,
+      "validation_accuracy": 0.953950173600536,
+      "validation_policy": {
+        "threshold": 0.78,
+        "accepted": 14730,
+        "errors": 257,
+        "coverage": 0.8972406651641591,
+        "error_rate": 0.017447386286490157,
+        "wilson_upper_95": 0.019691120340010172,
+        "negative_coverage": 0.8155770782889427,
+        "positive_coverage": 0.9325538783701248
+      },
+      "features": 100000
+    },
+    {
+      "config": {
+        "id": "word100-c8",
+        "word_ngram": 2,
+        "word_min_df": 2,
+        "word_max_features": 100000,
+        "C": 8.0
+      },
+      "fit_seconds": 2.904128660000424,
+      "validation_macro_f1": 0.9452914104138868,
+      "validation_accuracy": 0.9540719985381008,
+      "validation_policy": {
+        "threshold": 0.81,
+        "accepted": 14718,
+        "errors": 260,
+        "coverage": 0.8965097155387708,
+        "error_rate": 0.017665443674412286,
+        "wilson_upper_95": 0.019923002991828666,
+        "negative_coverage": 0.8159806295399515,
+        "positive_coverage": 0.9313323444725591
+      },
+      "features": 100000
+    },
+    {
+      "config": {
+        "id": "word150-c8",
+        "word_ngram": 2,
+        "word_min_df": 2,
+        "word_max_features": 150000,
+        "C": 8.0
+      },
+      "fit_seconds": 2.9666588920008508,
+      "validation_macro_f1": 0.945707810524268,
+      "validation_accuracy": 0.9544374733507949,
+      "validation_policy": {
+        "threshold": 0.81,
+        "accepted": 14730,
+        "errors": 258,
+        "coverage": 0.8972406651641591,
+        "error_rate": 0.017515274949083504,
+        "wilson_upper_95": 0.019763019145757964,
+        "negative_coverage": 0.8188054882970137,
+        "positive_coverage": 0.9311578396300497
+      },
+      "features": 132081
+    },
+    {
+      "config": {
+        "id": "trigram100-c8",
+        "word_ngram": 3,
+        "word_min_df": 2,
+        "word_max_features": 100000,
+        "C": 8.0
+      },
+      "fit_seconds": 5.646259053002723,
+      "validation_macro_f1": 0.9463383929849235,
+      "validation_accuracy": 0.9549247731010538,
+      "validation_policy": {
+        "threshold": 0.81,
+        "accepted": 14766,
+        "errors": 257,
+        "coverage": 0.899433514040324,
+        "error_rate": 0.01740484897738047,
+        "wilson_upper_95": 0.019643170778780198,
+        "negative_coverage": 0.822639225181598,
+        "positive_coverage": 0.9326411307913794
+      },
+      "features": 100000
+    },
+    {
+      "config": {
+        "id": "word-char-c4",
+        "word_ngram": 2,
+        "word_min_df": 3,
+        "word_max_features": 60000,
+        "C": 4.0,
+        "char": true
+      },
+      "fit_seconds": 13.727074354999786,
+      "validation_macro_f1": 0.9459349991282217,
+      "validation_accuracy": 0.954620210757142,
+      "validation_policy": {
+        "threshold": 0.8,
+        "accepted": 14756,
+        "errors": 257,
+        "coverage": 0.8988243893525004,
+        "error_rate": 0.01741664407698563,
+        "wilson_upper_95": 0.019656466661283414,
+        "negative_coverage": 0.8165859564164649,
+        "positive_coverage": 0.9343861792164733
+      },
+      "features": 110000
+    }
+  ],
+  "selection": {
+    "winner": {
+      "config": {
+        "id": "trigram100-c8",
+        "word_ngram": 3,
+        "word_min_df": 2,
+        "word_max_features": 100000,
+        "C": 8.0
+      },
+      "fit_seconds": 5.646259053002723,
+      "validation_macro_f1": 0.9463383929849235,
+      "validation_accuracy": 0.9549247731010538,
+      "validation_policy": {
+        "threshold": 0.81,
+        "accepted": 14766,
+        "errors": 257,
+        "coverage": 0.899433514040324,
+        "error_rate": 0.01740484897738047,
+        "wilson_upper_95": 0.019643170778780198,
+        "negative_coverage": 0.822639225181598,
+        "positive_coverage": 0.9326411307913794
+      },
+      "features": 100000
+    },
+    "baseline": {
+      "config": {
+        "id": "baseline-word40-c8",
+        "word_ngram": 2,
+        "word_min_df": 3,
+        "word_max_features": 40000,
+        "C": 8.0
+      },
+      "fit_seconds": 2.8551055409989203,
+      "validation_macro_f1": 0.9459349991282217,
+      "validation_accuracy": 0.954620210757142,
+      "validation_policy": {
+        "threshold": 0.81,
+        "accepted": 14780,
+        "errors": 255,
+        "coverage": 0.9002862886032771,
+        "error_rate": 0.01725304465493911,
+        "wilson_upper_95": 0.01948125002116993,
+        "negative_coverage": 0.8238498789346247,
+        "positive_coverage": 0.933339150161417
+      },
+      "features": 40000
+    },
+    "selection_completed_before_test": true
+  },
+  "test": {
+    "baseline-word40-c8": {
+      "macro_f1": 0.9408692378050223,
+      "accuracy": 0.9512008476571697,
+      "negative_recall": 0.9121852970795569,
+      "confusion_matrix": [
+        [
+          4529,
+          436
+        ],
+        [
+          393,
+          11630
+        ]
+      ],
+      "policy": {
+        "threshold": 0.81,
+        "accepted": 15278,
+        "errors": 291,
+        "coverage": 0.8993407110901813,
+        "error_rate": 0.019046995680062836,
+        "wilson_upper_95": 0.021338501858259015,
+        "negative_coverage": 0.8169184290030211,
+        "positive_coverage": 0.9333776927555518
+      },
+      "batch_inference_seconds": 0.41757356000016443
+    },
+    "trigram100-c8": {
+      "macro_f1": 0.9431585060061145,
+      "accuracy": 0.9530845302566517,
+      "negative_recall": 0.9156092648539779,
+      "confusion_matrix": [
+        [
+          4546,
+          419
+        ],
+        [
+          378,
+          11645
+        ]
+      ],
+      "policy": {
+        "threshold": 0.81,
+        "accepted": 15264,
+        "errors": 261,
+        "coverage": 0.8985165999529079,
+        "error_rate": 0.017099056603773585,
+        "wilson_upper_95": 0.019280550497375207,
+        "negative_coverage": 0.8159113796576032,
+        "positive_coverage": 0.9326291275056142
+      },
+      "batch_inference_seconds": 0.5631150339977467
+    }
+  },
+  "paired_comparison": {
+    "resampling_unit": "product_id",
+    "replicates": 2000,
+    "seed": 42,
+    "products": 6395,
+    "baseline_wrong_winner_right": 84,
+    "baseline_right_winner_wrong": 52,
+    "paired_accuracy_delta_95_percentile": [
+      0.0005080237522251202,
+      0.003295315740861303
+    ],
+    "paired_macro_f1_delta_95_percentile": [
+      0.0006366837480409893,
+      0.0040010801904319625
+    ]
+  }
+}

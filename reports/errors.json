@@ -7,15 +7,15 @@
     "accepted": true
   },
   {
-    "source_csv_line": 8539,
-    "stars": 1,
+    "source_csv_line": 123812,
+    "stars": 2,
     "predicted": "positiva",
     "score": 1.0,
     "accepted": true
   },
   {
-    "source_csv_line": 123812,
-    "stars": 2,
+    "source_csv_line": 8539,
+    "stars": 1,
     "predicted": "positiva",
     "score": 1.0,
     "accepted": true
@@ -31,21 +31,7 @@
     "source_csv_line": 25893,
     "stars": 1,
     "predicted": "positiva",
-    "score": 0.9998,
-    "accepted": true
-  },
-  {
-    "source_csv_line": 78372,
-    "stars": 1,
-    "predicted": "positiva",
-    "score": 0.9998,
-    "accepted": true
-  },
-  {
-    "source_csv_line": 127456,
-    "stars": 4,
-    "predicted": "negativa",
-    "score": 0.9998,
+    "score": 0.9997,
     "accepted": true
   },
   {
@@ -56,52 +42,66 @@
     "accepted": true
   },
   {
-    "source_csv_line": 99710,
-    "stars": 5,
-    "predicted": "negativa",
+    "source_csv_line": 59388,
+    "stars": 1,
+    "predicted": "positiva",
     "score": 0.9997,
     "accepted": true
   },
   {
-    "source_csv_line": 59388,
-    "stars": 1,
-    "predicted": "positiva",
-    "score": 0.9994,
+    "source_csv_line": 127456,
+    "stars": 4,
+    "predicted": "negativa",
+    "score": 0.9996,
     "accepted": true
   },
   {
-    "source_csv_line": 44140,
-    "stars": 2,
+    "source_csv_line": 78372,
+    "stars": 1,
     "predicted": "positiva",
-    "score": 0.9984,
+    "score": 0.9993,
+    "accepted": true
+  },
+  {
+    "source_csv_line": 99710,
+    "stars": 5,
+    "predicted": "negativa",
+    "score": 0.9991,
     "accepted": true
   },
   {
     "source_csv_line": 99191,
     "stars": 5,
     "predicted": "negativa",
-    "score": 0.9983,
+    "score": 0.9978,
     "accepted": true
   },
   {
-    "source_csv_line": 100780,
-    "stars": 2,
-    "predicted": "positiva",
-    "score": 0.9979,
-    "accepted": true
-  },
-  {
-    "source_csv_line": 112265,
+    "source_csv_line": 44140,
     "stars": 2,
     "predicted": "positiva",
     "score": 0.9976,
     "accepted": true
   },
   {
-    "source_csv_line": 84080,
-    "stars": 5,
-    "predicted": "negativa",
+    "source_csv_line": 100780,
+    "stars": 2,
+    "predicted": "positiva",
     "score": 0.9975,
+    "accepted": true
+  },
+  {
+    "source_csv_line": 112265,
+    "stars": 2,
+    "predicted": "positiva",
+    "score": 0.9972,
+    "accepted": true
+  },
+  {
+    "source_csv_line": 42791,
+    "stars": 2,
+    "predicted": "positiva",
+    "score": 0.9969,
     "accepted": true
   }
 ]

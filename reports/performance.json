@@ -1,0 +1,33 @@
+{
+  "previous": {
+    "repetitions": 500,
+    "texts": 200,
+    "median_ms": 13.9464,
+    "p95_ms": 15.6101,
+    "mean_ms": 14.1152,
+    "python": "3.14.8",
+    "model_bytes": 1929163,
+    "scope": "cpu local, sem http, depois de aquecer; mesma amostra de 200 textos"
+  },
+  "previous_with_optimization": {
+    "repetitions": 500,
+    "texts": 200,
+    "median_ms": 0.3724,
+    "p95_ms": 0.4339,
+    "mean_ms": 0.3781,
+    "python": "3.14.8",
+    "model_bytes": 1929163,
+    "scope": "cpu local, sem http, depois de aquecer; mesma amostra de 200 textos"
+  },
+  "current": {
+    "repetitions": 500,
+    "texts": 200,
+    "median_ms": 0.4003,
+    "p95_ms": 0.5008,
+    "mean_ms": 0.4122,
+    "python": "3.14.8",
+    "model_bytes": 5076140,
+    "scope": "cpu local, sem http, depois de aquecer; mesma amostra de 200 textos"
+  },
+  "speedup_median": 34.83987009742693
+}
