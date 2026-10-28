@@ -44,3 +44,16 @@ linha, nota e score, sem reproduzir o texto original.
 
 Referência: Real, L.; Oshiro, M.; Mafra, A. (2019).
 *B2W-Reviews01: An Open Product Reviews Corpus*. STIL.
+
+## Olist
+
+A versão 2 do [Brazilian E-Commerce Public Dataset by Olist](https://www.kaggle.com/datasets/olistbr/brazilian-ecommerce)
+contém 99.224 avaliações de pedidos. A avaliação externa usa apenas
+`review_comment_message` e `review_score`, sem título ou dados do pedido.
+O texto foi anonimizado pela fonte. Licença CC BY-NC-SA 4.0, atribuição Olist.
+
+O CSV `olist_order_reviews_dataset.csv` tem 14.451.670 bytes e SHA-256
+`012b61c7593e34f51fa614efdf802b9c7056ce6aae5307ddb93236e7cfc797d7`.
+O download oficial é feito por `uv run python scripts/evaluate_olist.py --download`.
+O relatório registra a limpeza e as 4.259 linhas removidas por sobreposição
+com o B2W. A Olist não integra o treinamento.

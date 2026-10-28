@@ -1,0 +1,81 @@
+{
+  "dataset": "Olist Brazilian E-Commerce Public Dataset",
+  "source": "https://www.kaggle.com/datasets/olistbr/brazilian-ecommerce",
+  "download_url": "https://www.kaggle.com/api/v1/datasets/download/olistbr/brazilian-ecommerce?datasetVersionNumber=2",
+  "source_version": 2,
+  "source_sha256": "012b61c7593e34f51fa614efdf802b9c7056ce6aae5307ddb93236e7cfc797d7",
+  "license": "CC BY-NC-SA 4.0",
+  "cleaning": {
+    "raw_rows": 99224,
+    "empty_text": 58397,
+    "b2w_overlap_rows_removed": 4259,
+    "duplicate_rows": 3094,
+    "conflicting_text_groups_removed": 162,
+    "three_star_rows_removed": 3101,
+    "evaluated_rows": 30211,
+    "negative_rows": 10084,
+    "positive_rows": 20127
+  },
+  "evaluation_text_sha256": "8f0047b37adbd090f7e86b059ac551704bded2bd0b67e387d891e862263b4f91",
+  "protocol": "avaliação externa; nenhum treino ou ajuste de limiar na olist; textos presentes em todo o b2w bruto excluídos",
+  "models": {
+    "current": {
+      "model_sha256": "261583a46fabe6d1718cbfcf6f4b0f50a24f076323b675edbb37d0d40f78afc8",
+      "threshold": 0.81,
+      "forced": {
+        "accuracy": 0.9188706100426997,
+        "macro_f1": 0.9097204490828945,
+        "negative_recall": 0.8995438318127728,
+        "confusion_matrix_negative_positive": [
+          [
+            9071,
+            1013
+          ],
+          [
+            1438,
+            18689
+          ]
+        ]
+      },
+      "policy": {
+        "threshold": 0.81,
+        "accepted": 25528,
+        "errors": 991,
+        "coverage": 0.8449902353447419,
+        "error_rate": 0.03882011908492636,
+        "wilson_upper_95": 0.041259965779975025,
+        "negative_coverage": 0.7488099960333201,
+        "positive_coverage": 0.8931783176827147
+      }
+    },
+    "baseline": {
+      "model_sha256": "a2268c3a6846d6236ed3292a88aeaeca9ca60ecb24fe08f36a6de81aad87f56c",
+      "threshold": 0.81,
+      "forced": {
+        "accuracy": 0.9172486842540797,
+        "macro_f1": 0.9078441488895443,
+        "negative_recall": 0.8954779849266165,
+        "confusion_matrix_negative_positive": [
+          [
+            9030,
+            1054
+          ],
+          [
+            1446,
+            18681
+          ]
+        ]
+      },
+      "policy": {
+        "threshold": 0.81,
+        "accepted": 25508,
+        "errors": 1027,
+        "coverage": 0.8443282248187746,
+        "error_rate": 0.040261878626313315,
+        "wilson_upper_95": 0.04274427325316808,
+        "negative_coverage": 0.7502975009916699,
+        "positive_coverage": 0.8914393600635961
+      }
+    }
+  }
+}
