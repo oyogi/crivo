@@ -1,0 +1,31 @@
+{
+  "legacy": {
+    "repetitions": 500,
+    "texts": 200,
+    "median_ms": 11.617,
+    "p95_ms": 12.2576,
+    "mean_ms": 11.7,
+    "python": "3.14.8",
+    "engine": "legacy",
+    "cpu": "13th Gen Intel(R) Core(TM) i5-1335U",
+    "openblas_threads": "1",
+    "platform": "Linux",
+    "model_bytes": 1929163,
+    "scope": "cpu local, sem http, depois de aquecer; mesma amostra de 200 textos"
+  },
+  "current": {
+    "repetitions": 500,
+    "texts": 200,
+    "median_ms": 0.3471,
+    "p95_ms": 0.4366,
+    "mean_ms": 0.3568,
+    "python": "3.14.8",
+    "engine": "current",
+    "cpu": "13th Gen Intel(R) Core(TM) i5-1335U",
+    "openblas_threads": "1",
+    "platform": "Linux",
+    "model_bytes": 5076140,
+    "scope": "cpu local, sem http, depois de aquecer; mesma amostra de 200 textos"
+  },
+  "speedup_median": 33.46874099683089
+}

@@ -7,12 +7,26 @@ opção de **revisão**. Roda em CPU, sem serviço externo.
 
 ## Rodar
 
+Python 3.12+ e uv.
+
 ```bash
+git clone https://github.com/oyogi/crivo.git
+cd crivo
 uv sync --locked
+uv run crivo demo
+```
+
+A demo usa o modelo publicado. Se o repositório for privado, usa a autenticação do `gh`.
+
+<details>
+<summary>Reproduzir o treino</summary>
+
+```bash
 uv run crivo download
 uv run crivo train
-uv run crivo serve
 ```
+
+</details>
 
 Abra `http://127.0.0.1:8000`. Exemplos em `/exemplos`.
 Testes: `uv run pytest -q`.
@@ -21,6 +35,7 @@ Testes: `uv run pytest -q`.
 ## Resultados
 
 Mesmo teste com 16.988 avaliações, de produtos separados do treino.
+O baseline de classe majoritária tem macro-F1 de 0,4144.
 
 | Medida | 0.2 | 0.3 |
 |---|---:|---:|
@@ -31,14 +46,14 @@ Mesmo teste com 16.988 avaliações, de produtos separados do treino.
 | Erro entre os aceitos | 1,90% | **1,71%** |
 
 Na avaliação externa com **30.211 comentários da Olist**, a acurácia passou
-de 91,72% para 91,89%. Esses comentários não entraram no treino nem na escolha
-do limiar.
+de 91,72% para 91,89%. O modelo aceita 84,50% dos textos, com erro de 3,88%
+entre os aceitos. Esses comentários não entraram no treino ou na escolha do limiar.
 
-A mediana da predição completa caiu de **13,95 ms para 0,40 ms** na mesma
-máquina, sem HTTP. Uma transformação por texto e nomes de features em cache.
+A conferência do benchmark mediu **11,62 ms na inferência anterior e 0,35 ms
+na atual**, na mesma máquina, sem HTTP. [Ambiente e reprodução](docs/desempenho.md).
 
 [Comparação dos modelos](reports/comparison.json) · [Avaliação externa](reports/external_olist.json)
-· [Benchmark](reports/performance.json) · [Erros](reports/errors.json)
+· [Benchmark](reports/benchmark_recheck.json) · [Análise de erros](docs/erros.md)
 
 ## Decisões
 
