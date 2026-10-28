@@ -4,14 +4,22 @@ import numpy as np
 import pytest
 
 from crivo.model import (
-    batch_signals, build_model, explain, policy_metrics, predict,
-    score_texts, select_threshold, wilson_upper,
+    batch_signals,
+    build_model,
+    explain,
+    policy_metrics,
+    predict,
+    score_texts,
+    select_threshold,
+    wilson_upper,
 )
 
 
 @pytest.fixture
 def fitted_model():
-    texts = ["ótimo produto gostei bastante"] * 4 + ["péssimo produto defeito horrível"] * 4
+    texts = ["ótimo produto gostei bastante"] * 4 + [
+        "péssimo produto defeito horrível"
+    ] * 4
     return build_model().fit(texts, [1] * 4 + [0] * 4)
 
 
@@ -27,14 +35,20 @@ def test_threshold_maximizes_coverage_under_validation_error_bound():
     labels = np.array([1] * 200 + [0] * 20)
     probabilities = np.array([0.9] * 200 + [0.6] * 20)
     selected, curve = select_threshold(
-        labels, probabilities, np.ones(220, dtype=bool), target_error=0.05,
+        labels,
+        probabilities,
+        np.ones(220, dtype=bool),
+        target_error=0.05,
     )
     assert selected["threshold"] == 0.61
     assert selected["accepted"] == 200
     assert selected["errors"] == 0
     assert selected["wilson_upper_95"] <= 0.05
-    feasible = [row for row in curve if row["accepted"] >= 100
-                and row["wilson_upper_95"] <= 0.05]
+    feasible = [
+        row
+        for row in curve
+        if row["accepted"] >= 100 and row["wilson_upper_95"] <= 0.05
+    ]
     assert selected["coverage"] == max(row["coverage"] for row in feasible)
     assert curve[0]["error_rate"] == pytest.approx(20 / 220)
 
@@ -44,7 +58,9 @@ def test_impossible_target_or_insufficient_sample_falls_back_to_review():
         ([1] * 200, [0.99] * 200, 0.0),
         ([1] * 99, [0.99] * 99, 0.1),
     ]:
-        selected, _ = select_threshold(labels, probabilities, [True] * len(labels), target)
+        selected, _ = select_threshold(
+            labels, probabilities, [True] * len(labels), target
+        )
         assert selected["threshold"] > 1
         assert selected["accepted"] == 0
         assert selected["coverage"] == 0
@@ -66,17 +82,23 @@ def test_explanation_uses_actual_tfidf_times_linear_coefficients(fitted_model):
     features = fitted_model["tfidf"].transform([text])
     names = fitted_model["tfidf"].get_feature_names_out()
     classifier = fitted_model["classifier"]
-    expected = {names[index]: float(value * classifier.coef_[0, index])
-                for index, value in zip(features.indices, features.data)}
+    expected = {
+        names[index]: float(value * classifier.coef_[0, index])
+        for index, value in zip(features.indices, features.data)
+    }
     assert set(row["termo"] for row in contributions) == set(expected)
     for row in contributions:
         assert row["peso"] == pytest.approx(expected[row["termo"]], abs=0.000051)
-        assert row["direcao"] == ("positiva" if expected[row["termo"]] > 0 else "negativa")
+        assert row["direcao"] == (
+            "positiva" if expected[row["termo"]] > 0 else "negativa"
+        )
     assert sum(row["peso"] for row in contributions) == pytest.approx(
-        fitted_model.decision_function([text])[0] - classifier.intercept_[0], abs=0.001,
+        fitted_model.decision_function([text])[0] - classifier.intercept_[0],
+        abs=0.001,
     )
     assert [abs(row["peso"]) for row in contributions] == sorted(
-        [abs(row["peso"]) for row in contributions], reverse=True,
+        [abs(row["peso"]) for row in contributions],
+        reverse=True,
     )
 
 
@@ -97,7 +119,10 @@ def test_batch_rejects_empty_input_and_reports_unknown_text(fitted_model):
         batch_signals(fitted_model, [], 0.8)
     signals = batch_signals(fitted_model, ["xilofonecosmico", "astronautazul"], 0.8)
     assert signals == {
-        "rows": 2, "review_rate": 1.0, "no_vocabulary_rate": 1.0, "short_text_rate": 1.0,
+        "rows": 2,
+        "review_rate": 1.0,
+        "no_vocabulary_rate": 1.0,
+        "short_text_rate": 1.0,
     }
 
 
@@ -109,10 +134,15 @@ def test_predict_rejects_invalid_input(fitted_model, text):
 
 def test_prediction_reuses_features_and_caches_names(fitted_model):
     from unittest.mock import patch
+
     bundle = {"model": fitted_model, "threshold": 0.8}
     vectorizer = fitted_model["tfidf"]
-    with patch.object(vectorizer, "transform", wraps=vectorizer.transform) as transform, \
-         patch.object(vectorizer, "get_feature_names_out", wraps=vectorizer.get_feature_names_out) as names:
+    with (
+        patch.object(vectorizer, "transform", wraps=vectorizer.transform) as transform,
+        patch.object(
+            vectorizer, "get_feature_names_out", wraps=vectorizer.get_feature_names_out
+        ) as names,
+    ):
         first = predict(bundle, "ótimo produto")
         second = predict(bundle, "ótimo produto")
     assert first == second

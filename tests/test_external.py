@@ -6,7 +6,9 @@ from pathlib import Path
 
 import pytest
 
-spec = importlib.util.spec_from_file_location("evaluate_olist", Path(__file__).parents[1] / "scripts/evaluate_olist.py")
+spec = importlib.util.spec_from_file_location(
+    "evaluate_olist", Path(__file__).parents[1] / "scripts/evaluate_olist.py"
+)
 external = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(external)
 
@@ -19,24 +21,34 @@ def write_csv(path, columns, rows):
     return path
 
 
-def test_external_removes_raw_b2w_overlap_duplicates_conflicts_and_three_stars(tmp_path):
-    b2w = write_csv(tmp_path / "b2w.csv", ["review_text"], [["Já aparece no treino!"], ["texto de qualquer outra partição"]])
-    olist = write_csv(tmp_path / "olist.csv", ["review_comment_message", "review_score"], [
-        ["JÁ aparece no treino...", 5],
-        ["Texto de qualquer outra partição", 1],
-        ["Boa experiência de compra", 5],
-        ["BOA experiência de compra!", 4],
-        ["conflito positivo e negativo", 1],
-        ["conflito positivo e negativo", 5],
-        ["conflito com três estrelas", 3],
-        ["conflito com três estrelas", 1],
-        ["avaliação mediana isolada", 3],
-        ["produto não foi entregue", 1],
-        ["", 5],
-        ["...", 1],
-        ["nota inválida", 6],
-        ["outra nota inválida", "ruim"],
-    ])
+def test_external_removes_raw_b2w_overlap_duplicates_conflicts_and_three_stars(
+    tmp_path,
+):
+    b2w = write_csv(
+        tmp_path / "b2w.csv",
+        ["review_text"],
+        [["Já aparece no treino!"], ["texto de qualquer outra partição"]],
+    )
+    olist = write_csv(
+        tmp_path / "olist.csv",
+        ["review_comment_message", "review_score"],
+        [
+            ["JÁ aparece no treino...", 5],
+            ["Texto de qualquer outra partição", 1],
+            ["Boa experiência de compra", 5],
+            ["BOA experiência de compra!", 4],
+            ["conflito positivo e negativo", 1],
+            ["conflito positivo e negativo", 5],
+            ["conflito com três estrelas", 3],
+            ["conflito com três estrelas", 1],
+            ["avaliação mediana isolada", 3],
+            ["produto não foi entregue", 1],
+            ["", 5],
+            ["...", 1],
+            ["nota inválida", 6],
+            ["outra nota inválida", "ruim"],
+        ],
+    )
     texts, labels, counts = external.load_external(olist, b2w)
     assert texts == ["Boa experiência de compra", "produto não foi entregue"]
     assert labels.tolist() == [1, 0]

@@ -10,7 +10,11 @@ requires-python = ">=3.12"
 dependencies = ["numpy==2.5.4", "scipy==1.18.1", "scikit-learn==1.9.1"]
 
 [dependency-groups]
-dev = ["pytest==9.2.0", "matplotlib>=3.10,<4"]
+dev = [
+    "pytest==9.2.0",
+    "matplotlib>=3.10,<4",
+    "ruff>=0.17.3",
+]
 
 [project.scripts]
 crivo = "crivo.__main__:main"
@@ -24,3 +28,10 @@ crivo = ["*.html", "*.css"]
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 pythonpath = ["src"]
+
+[tool.ruff]
+line-length = 88
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["E4", "E7", "E9", "F", "I"]

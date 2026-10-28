@@ -1,7 +1,6 @@
 """demo local sem dependências extras, persistência ou logs dos textos."""
 
 import json
-import socket
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from importlib.resources import files
 
@@ -23,9 +22,12 @@ def make_handler(bundle: dict):
             self.send_header("Content-Length", str(len(body)))
             self.send_header("Cache-Control", "no-store")
             self.send_header("X-Content-Type-Options", "nosniff")
-            self.send_header("Content-Security-Policy", "default-src 'self'; "
-                             "script-src 'unsafe-inline'; style-src 'self'; "
-                             "base-uri 'none'; frame-ancestors 'none'")
+            self.send_header(
+                "Content-Security-Policy",
+                "default-src 'self'; "
+                "script-src 'unsafe-inline'; style-src 'self'; "
+                "base-uri 'none'; frame-ancestors 'none'",
+            )
             self.end_headers()
             try:
                 self.wfile.write(body)
@@ -33,7 +35,9 @@ def make_handler(bundle: dict):
                 pass
 
         def json_response(self, status: int, value: dict):
-            body = json.dumps(value, ensure_ascii=False, allow_nan=False).encode("utf-8")
+            body = json.dumps(value, ensure_ascii=False, allow_nan=False).encode(
+                "utf-8"
+            )
             self.respond(status, body, "application/json; charset=utf-8")
 
         def do_GET(self):
@@ -46,15 +50,21 @@ def make_handler(bundle: dict):
                 self.json_response(404, {"erro": "rota não encontrada"})
                 return
             filename, content_type = routes[self.path]
-            self.respond(200, files("crivo").joinpath(filename).read_bytes(), content_type)
+            self.respond(
+                200, files("crivo").joinpath(filename).read_bytes(), content_type
+            )
 
         def do_POST(self):
             if self.path != "/predict":
                 self.json_response(404, {"erro": "rota não encontrada"})
                 return
             lengths = self.headers.get_all("Content-Length", [])
-            if (self.headers.get("Transfer-Encoding") or len(lengths) != 1
-                    or not lengths[0].isascii() or not lengths[0].isdigit()):
+            if (
+                self.headers.get("Transfer-Encoding")
+                or len(lengths) != 1
+                or not lengths[0].isascii()
+                or not lengths[0].isdigit()
+            ):
                 self.json_response(400, {"erro": "content-length ausente ou inválido"})
                 return
             # comparar pelo tamanho evita converter inteiros gigantes enviados no cabeçalho
@@ -69,10 +79,14 @@ def make_handler(bundle: dict):
                 if len(raw) != length:
                     raise ValueError("corpo incompleto")
                 payload = json.loads(raw.decode("utf-8"))
-                if not isinstance(payload, dict) or not isinstance(payload.get("text"), str):
-                    raise ValueError("envie um objeto json com o campo text em formato de texto")
+                if not isinstance(payload, dict) or not isinstance(
+                    payload.get("text"), str
+                ):
+                    raise ValueError(
+                        "envie um objeto json com o campo text em formato de texto"
+                    )
                 result = predict(bundle, payload["text"])
-            except (ValueError, UnicodeError, socket.timeout) as error:
+            except (TimeoutError, ValueError, UnicodeError) as error:
                 self.json_response(400, {"erro": str(error)})
                 return
             self.json_response(200, result)

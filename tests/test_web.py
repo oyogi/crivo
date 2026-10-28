@@ -26,8 +26,9 @@ class FakeSocket:
 
 @pytest.fixture(scope="module")
 def handler():
-    model = build_model().fit(["produto ótimo"] * 3 + ["produto péssimo"] * 3,
-                              [1] * 3 + [0] * 3)
+    model = build_model().fit(
+        ["produto ótimo"] * 3 + ["produto péssimo"] * 3, [1] * 3 + [0] * 3
+    )
     return make_handler({"model": model, "threshold": 0.8})
 
 
@@ -49,7 +50,9 @@ def test_page_and_prediction(handler, capsys):
     assert b"text/html; charset=utf-8" in head
     assert "Crivo" in body.decode()
     assert b"Cache-Control: no-store" in head
-    status, _, body = request(handler, "POST", "/predict", json.dumps({"text": "produto ótimo"}).encode())
+    status, _, body = request(
+        handler, "POST", "/predict", json.dumps({"text": "produto ótimo"}).encode()
+    )
     assert status == 200
     result = json.loads(body)
     assert result["decisao"] in ("positiva", "revisar")
@@ -57,7 +60,9 @@ def test_page_and_prediction(handler, capsys):
     assert capsys.readouterr().err == ""
 
 
-@pytest.mark.parametrize("body", [b"{", b"[]", b"null", b"{}", b'{"text":12}', b'{"text":null}', b'\xff'])
+@pytest.mark.parametrize(
+    "body", [b"{", b"[]", b"null", b"{}", b'{"text":12}', b'{"text":null}', b"\xff"]
+)
 def test_invalid_json_or_text_returns_400(handler, body):
     status, _, response = request(handler, "POST", "/predict", body)
     assert status == 400
@@ -66,32 +71,45 @@ def test_invalid_json_or_text_returns_400(handler, body):
 
 @pytest.mark.parametrize("length", ["-1", "2.5", "abc", "+2", "1e5", ""])
 def test_malformed_length_is_rejected(handler, length):
-    status, _, _ = request(handler, "POST", "/predict", b"{}", [("Content-Length", length)])
+    status, _, _ = request(
+        handler, "POST", "/predict", b"{}", [("Content-Length", length)]
+    )
     assert status == 400
 
 
 def test_missing_duplicated_length_and_chunked_are_rejected(handler):
-    for headers in [[], [("Content-Length", "2"), ("Content-Length", "2")],
-                    [("Content-Length", "2"), ("Transfer-Encoding", "chunked")]]:
+    for headers in [
+        [],
+        [("Content-Length", "2"), ("Content-Length", "2")],
+        [("Content-Length", "2"), ("Transfer-Encoding", "chunked")],
+    ]:
         status, _, _ = request(handler, "POST", "/predict", b"{}", headers)
         assert status == 400
 
 
 def test_oversized_body_and_huge_numeric_header_are_rejected(handler):
     for length in [str(MAX_BODY_BYTES + 1), "9" * 5000]:
-        status, _, _ = request(handler, "POST", "/predict", b"", [("Content-Length", length)])
+        status, _, _ = request(
+            handler, "POST", "/predict", b"", [("Content-Length", length)]
+        )
         assert status == 413
 
 
 def test_short_body_and_text_above_model_limit_are_rejected(handler):
-    status, _, _ = request(handler, "POST", "/predict", b"{}", [("Content-Length", "20")])
+    status, _, _ = request(
+        handler, "POST", "/predict", b"{}", [("Content-Length", "20")]
+    )
     assert status == 400
-    status, _, body = request(handler, "POST", "/predict", json.dumps({"text": "a" * 10001}).encode())
+    status, _, body = request(
+        handler, "POST", "/predict", json.dumps({"text": "a" * 10001}).encode()
+    )
     assert status == 400
     assert "10 mil" in json.loads(body)["erro"]
 
 
-@pytest.mark.parametrize("method,path", [("GET", "/predict"), ("POST", "/"), ("GET", "/favicon.ico")])
+@pytest.mark.parametrize(
+    "method,path", [("GET", "/predict"), ("POST", "/"), ("GET", "/favicon.ico")]
+)
 def test_unknown_routes_return_404(handler, method, path):
     status, _, _ = request(handler, method, path)
     assert status == 404
@@ -108,8 +126,9 @@ def test_body_limit_is_inclusive_and_length_allows_leading_zeroes(handler):
     padded = body + b" " * (MAX_BODY_BYTES - len(body))
     status, _, _ = request(handler, "POST", "/predict", padded)
     assert status == 200
-    status, _, _ = request(handler, "POST", "/predict", body,
-                           [("Content-Length", "000" + str(len(body)))])
+    status, _, _ = request(
+        handler, "POST", "/predict", body, [("Content-Length", "000" + str(len(body)))]
+    )
     assert status == 200
 
 

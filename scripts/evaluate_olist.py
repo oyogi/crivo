@@ -11,7 +11,8 @@ from zipfile import ZipFile
 
 import numpy as np
 
-from crivo.data import SOURCE_SHA256 as B2W_SHA256, normalize, sha256
+from crivo.data import SOURCE_SHA256 as B2W_SHA256
+from crivo.data import normalize, sha256
 from crivo.model import policy_metrics, score_texts
 from crivo.train import classification_metrics, load_bundle, write_json
 
@@ -57,7 +58,9 @@ def load_external(csv_path: Path, b2w_path: Path) -> tuple[list[str], np.ndarray
     counts = Counter()
     with csv_path.open(encoding="utf-8-sig", newline="") as handle:
         source = csv.DictReader(handle)
-        if not {"review_comment_message", "review_score"}.issubset(source.fieldnames or []):
+        if not {"review_comment_message", "review_score"}.issubset(
+            source.fieldnames or []
+        ):
             raise ValueError("csv olist sem as colunas esperadas")
         for row in source:
             counts["raw_rows"] += 1
@@ -91,7 +94,11 @@ def load_external(csv_path: Path, b2w_path: Path) -> tuple[list[str], np.ndarray
     counts["evaluated_rows"] = len(binary)
     counts["negative_rows"] = sum(label == 0 for _, label in binary)
     counts["positive_rows"] = sum(label == 1 for _, label in binary)
-    return [text for text, _ in binary], np.array([label for _, label in binary]), dict(counts)
+    return (
+        [text for text, _ in binary],
+        np.array([label for _, label in binary]),
+        dict(counts),
+    )
 
 
 def evaluate(model_path: Path, texts: list[str], labels: np.ndarray) -> dict:
@@ -105,7 +112,9 @@ def evaluate(model_path: Path, texts: list[str], labels: np.ndarray) -> dict:
     }
 
 
-def run(csv_path: Path, b2w_path: Path, model_path: Path, baseline_path: Path | None = None) -> dict:
+def run(
+    csv_path: Path, b2w_path: Path, model_path: Path, baseline_path: Path | None = None
+) -> dict:
     if sha256(csv_path) != SOURCE_SHA256:
         raise ValueError("o csv olist não corresponde à versão documentada")
     if sha256(b2w_path) != B2W_SHA256:
@@ -124,19 +133,25 @@ def run(csv_path: Path, b2w_path: Path, model_path: Path, baseline_path: Path | 
         "source_sha256": SOURCE_SHA256,
         "license": "CC BY-NC-SA 4.0",
         "cleaning": cleaning,
-        "evaluation_text_sha256": hashlib.sha256("\n".join(normalize(t) for t in texts).encode()).hexdigest(),
+        "evaluation_text_sha256": hashlib.sha256(
+            "\n".join(normalize(t) for t in texts).encode()
+        ).hexdigest(),
         "protocol": "avaliação externa; nenhum treino ou ajuste de limiar na olist; textos presentes em todo o b2w bruto excluídos",
         "models": models,
     }
 
 
 def main():
-    parser = argparse.ArgumentParser(description="avaliação externa com comentários da olist")
+    parser = argparse.ArgumentParser(
+        description="avaliação externa com comentários da olist"
+    )
     parser.add_argument("--csv", type=Path, default=Path("data") / CSV_NAME)
     parser.add_argument("--b2w", type=Path, default=Path("data/B2W-Reviews01.csv"))
     parser.add_argument("--model", type=Path, default=Path("artifacts/model.pkl"))
     parser.add_argument("--baseline", type=Path)
-    parser.add_argument("--output", type=Path, default=Path("reports/external_olist.json"))
+    parser.add_argument(
+        "--output", type=Path, default=Path("reports/external_olist.json")
+    )
     parser.add_argument("--download", action="store_true")
     args = parser.parse_args()
     try:

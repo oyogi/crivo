@@ -46,7 +46,9 @@ def normalize(text: str) -> str:
 
 
 def split_for(product: str) -> str:
-    bucket = int(hashlib.sha256(f"na-duvida-v1:{product}".encode()).hexdigest(), 16) % 100
+    bucket = (
+        int(hashlib.sha256(f"na-duvida-v1:{product}".encode()).hexdigest(), 16) % 100
+    )
     return "train" if bucket < 70 else "validation" if bucket < 85 else "test"
 
 

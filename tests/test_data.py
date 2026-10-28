@@ -16,32 +16,41 @@ def write_reviews(path, rows):
 
 
 def test_duplicates_and_conflicting_labels_are_removed(tmp_path):
-    path = write_reviews(tmp_path / "reviews.csv", [
-        ("a", "Muito bom!", 4),
-        ("b", "  MUITO bom...  ", 5),
-        ("c", "opinião conflitante", 1),
-        ("d", "opinião conflitante", 4),
-        ("e", "neutro ou positivo", 3),
-        ("f", "neutro ou positivo", 5),
-        ("g", "negativo ou neutro", 2),
-        ("h", "negativo ou neutro", 3),
-        ("i", "texto único", 1),
-    ])
+    path = write_reviews(
+        tmp_path / "reviews.csv",
+        [
+            ("a", "Muito bom!", 4),
+            ("b", "  MUITO bom...  ", 5),
+            ("c", "opinião conflitante", 1),
+            ("d", "opinião conflitante", 4),
+            ("e", "neutro ou positivo", 3),
+            ("f", "neutro ou positivo", 5),
+            ("g", "negativo ou neutro", 2),
+            ("h", "negativo ou neutro", 3),
+            ("i", "texto único", 1),
+        ],
+    )
     reviews, counts = prepare(path)
-    assert [(review.product, review.rating) for review in reviews] == [("a", 4), ("i", 1)]
+    assert [(review.product, review.rating) for review in reviews] == [
+        ("a", 4),
+        ("i", 1),
+    ]
     assert counts["duplicate_rows"] == 4
     assert counts["conflicting_text_groups_removed"] == 3
     assert counts["clean_rows"] == 2
 
 
 def test_empty_invalid_rows_and_invalid_schema(tmp_path):
-    path = write_reviews(tmp_path / "reviews.csv", [
-        ("a", "...", 1),
-        ("b", "texto de teste", "sem nota"),
-        ("c", "outro texto", 6),
-        ("", "produto ausente", 5),
-        ("d", "avaliação válida", 3),
-    ])
+    path = write_reviews(
+        tmp_path / "reviews.csv",
+        [
+            ("a", "...", 1),
+            ("b", "texto de teste", "sem nota"),
+            ("c", "outro texto", 6),
+            ("", "produto ausente", 5),
+            ("d", "avaliação válida", 3),
+        ],
+    )
     reviews, counts = prepare(path)
     assert len(reviews) == 1
     assert counts["empty_text"] == 1
@@ -63,18 +72,22 @@ def test_products_and_normalized_texts_never_cross_partitions(tmp_path):
             break
     rows = []
     for name, product in products.items():
-        rows.extend([
-            (product, f"avaliação boa {name}", 5),
-            (product, f"avaliação ruim {name}", 1),
-            (product, f"avaliação média {name}", 3),
-        ])
+        rows.extend(
+            [
+                (product, f"avaliação boa {name}", 5),
+                (product, f"avaliação ruim {name}", 1),
+                (product, f"avaliação média {name}", 3),
+            ]
+        )
     rows.append((products["test"], "AVALIAÇÃO BOA train!", 4))
     reviews, _ = prepare(write_reviews(tmp_path / "reviews.csv", rows))
     parts = partition(reviews)
     names = ("train", "validation", "test")
     for index, left in enumerate(names):
-        for right in names[index + 1:]:
-            assert {r.product for r in parts[left]}.isdisjoint(r.product for r in parts[right])
+        for right in names[index + 1 :]:
+            assert {r.product for r in parts[left]}.isdisjoint(
+                r.product for r in parts[right]
+            )
             assert {normalize(r.text) for r in parts[left]}.isdisjoint(
                 normalize(r.text) for r in parts[right]
             )
