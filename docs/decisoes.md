@@ -1,64 +1,39 @@
-# Algumas escolhas e o que ficou de fora
+# Decisões do experimento
 
-## Por que um modelo linear?
+## Modelo
 
-Para esse tamanho de projeto, uma boa pergunta é: um modelo barato já resolve
-parte do problema? TF-IDF com regressão logística deixa o treino curto, roda
-em CPU e permite inspecionar os pesos. Uma comparação com BERTimbau seria
-interessante depois, medindo ganho, memória e latência sob o mesmo split.
-Não houve essa comparação aqui, então não há conclusão sobre qual modelo vence.
+TF-IDF e regressão logística permitem treinar em CPU e inspecionar os pesos.
+O vocabulário usa palavras e pares de palavras. Não removo stopwords para
+preservar expressões como “não recomendo”. C=0,5, 2 e 8 são comparados pelo
+macro-F1 na validação; venceu C=8.
 
-Não removo stopwords: “não” pode inverter a opinião. Mantenho unigramas e
-bigramas para capturar expressões como “não recomendo”. Isso ajuda em alguns
-casos, mas não dá compreensão geral de negação, ironia ou contexto.
+O baseline sempre prevê a classe majoritária. Ele acerta 70,77% do teste,
+mas não identifica nenhuma avaliação negativa. Por isso a comparação usa
+macro-F1, além da matriz de confusão e do recall de negativas.
 
-## Por que comparar com a classe majoritária?
+## Revisão
 
-O teste tem mais avaliações positivas. Um sistema que só diz “positiva” já
-acerta 70,77%, mas tem recall zero para negativas. Macro-F1 dá o mesmo peso
-às duas classes e deixa esse defeito mais claro. A matriz de confusão e o
-recall de negativas também estão no JSON.
+A validação escolhe o limiar de maior cobertura cujo limite superior de
+Wilson de 95% para o erro fique em até 2%, com pelo menos 100 textos aceitos.
+A busca percorre 0,50 a 0,99 em passos de 0,01. Sem candidato, tudo vai para
+revisão. Textos sem termos conhecidos também vão para revisão.
 
-## O que a revisão está otimizando?
+No teste, o limiar 0,81 aceita 89,93% dos textos e erra 1,90% nessa parcela.
+O limite superior de Wilson fica em 2,13%. A meta de validação não é uma
+garantia sobre novos dados. Os scores não foram calibrados.
 
-Não é “reconhecer texto difícil”. É reduzir o erro nas decisões automáticas,
-aceitando encaminhar parte dos textos para uma pessoa. Para cada limiar de
-0,50 a 0,99, em passos de 0,01, conto cobertura e erro na validação.
-Uso o limite superior do intervalo de Wilson de 95%, não só a estimativa
-pontual; um limiar que aceitou dois textos não ganha por sorte.
+## Avaliação
 
-Uma primeira execução usou orçamento de 10% de erro. Na validação,
-o modelo já errava cerca de 4,5%, então o limiar 0,50 aceitava quase tudo.
-A meta foi apertada para 2% para estudar a troca entre erro e cobertura.
-Os resultados do piloto, inclusive do teste, já tinham sido vistos durante
-o desenvolvimento. Por isso os resultados finais são **exploratórios**,
-e não um benchmark confirmatório com teste jamais consultado.
-O código final escolhe C e limiar só na validação, mas uma avaliação rigorosa
-posterior deve usar novos dados ainda não vistos pelo desenvolvimento.
+O piloto usava uma meta de 10%, que aceitava quase tudo na validação.
+A meta foi reduzida para 2% após o piloto, quando o primeiro resultado de
+teste já havia sido visto. Os resultados publicados são exploratórios.
 
-A mesma validação escolhe C e limiar. O intervalo usado na seleção não corrige
-o efeito de buscar vários candidatos. Também não considera dependência entre
-avaliações do mesmo produto. “Limite de 2%” é orçamento para selecionar uma
-política, não SLA, garantia estatística futura ou probabilidade individual.
-No teste publicado o erro pontual ficou em 1,90%, enquanto o limite superior
-de Wilson ultrapassa 2%. Isso permanece no relatório, sem retocar o limiar.
+C e limiar compartilham a validação. O intervalo não corrige a busca entre
+candidatos nem a dependência entre avaliações do mesmo produto.
+O artefato salvo foi treinado só no treino; refazê-lo com a validação mudaria
+os scores usados para escolher o limiar.
 
-## Por que não retreinar com treino + validação?
+A limpeza remove conflitos de rótulo no corpus inteiro. As métricas valem
+para essa base filtrada. O split isola produtos, mas não autores ou datas.
 
-O limiar foi escolhido para os scores daquele modelo, treinado só no treino.
-Retreinar muda os scores e invalidaria essa escolha. O artefato salvo é o
-mesmo modelo avaliado, sem esse retreino.
-
-## O que vale investigar em seguida
-
-- Coletar um lote rotulado no domínio de destino e congelar um teste externo.
-- Calibrar scores em uma partição própria e verificar com reliability diagram.
-- Medir incerteza por produto, com bootstrap agrupado, em vez de tratar linhas
-  correlacionadas como observações independentes.
-- Auditar rótulos discordantes e os erros de score alto antes de trocar de modelo.
-- Comparar com um encoder em português mantendo o mesmo protocolo.
-
-Referências técnicas: [extração de texto](https://scikit-learn.org/stable/modules/feature_extraction.html#text-feature-extraction),
-[regressão logística](https://scikit-learn.org/stable/modules/linear_model.html#logistic-regression),
-[métricas](https://scikit-learn.org/stable/modules/model_evaluation.html),
-[persistência de modelos](https://scikit-learn.org/stable/model_persistence.html).
+[Parâmetros e métricas](../reports/metrics.json) · [Erros](../reports/errors.json)

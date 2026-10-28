@@ -1,31 +1,9 @@
 # Crivo
 
-**Classifica avaliações em português e separa o que merece revisão.**
+Classifica avaliações em português como **positiva** ou **negativa**, com
+opção de **revisão**.
 
-Uma avaliação pode elogiar o produto e reclamar da entrega. O Crivo usa um modelo
-pequeno para classificar o texto — e mede o custo de deixar parte das decisões
-com uma pessoa. Tudo roda em CPU, sem API paga.
-
-![Crivo em execução com uma avaliação real da Americanas](docs/images/crivo-desktop.jpg)
-
-## Resultado medido
-
-132.373 avaliações na fonte; 77.044 no treino e **16.988 no teste**, com produtos
-separados. TF-IDF + regressão logística. Notas 1–2 = negativa; 4–5 = positiva.
-
-| No teste | Resultado |
-|---|---:|
-| Macro-F1 do baseline majoritário | 0,4144 |
-| Macro-F1 do modelo | **0,9409** |
-| Erro classificando tudo | 4,88% |
-| Textos aceitos automaticamente | **89,93%** |
-| Erro entre os aceitos | **1,90%** |
-
-![Cobertura versus erro, calculados no teste](docs/images/cobertura.png)
-
-O limiar 0,81 foi escolhido na validação. Os 1,90% não incluem os textos enviados
-para revisão. Score alto também erra: [os erros estão aqui](reports/errors.json).
-O desenvolvimento incluiu um piloto; estes resultados são exploratórios.
+![Crivo](docs/images/crivo-desktop.jpg)
 
 ## Rodar
 
@@ -36,45 +14,39 @@ uv run crivo train
 uv run crivo serve
 ```
 
-Demo em `http://127.0.0.1:8000`. Testes: `uv run pytest -q`.
-Modelo treinado e metadados disponíveis na [release](https://github.com/oyogi/crivo/releases/tag/v0.2.0).
-O [uv.lock](uv.lock) fixa as dependências; o download confere o SHA-256 do corpus.
+Abra `http://127.0.0.1:8000`. Os exemplos ficam em `/exemplos`.
 
-## O que há por dentro
+Testes: `uv run pytest -q`.
+[Modelo treinado](https://github.com/oyogi/crivo/releases/tag/v0.2.0).
 
-Texto duplicado sai antes da divisão por produto. O vocabulário aprende só no
-treino. A validação escolhe regularização e limiar de revisão; o teste mede
-cobertura e erro. Sem termos conhecidos, a saída é revisão. Os pesos exibidos
-são contribuições reais do modelo linear.
+## Resultados
 
-[Diagrama UML](docs/architecture.svg) · [Fonte diagrams.uml](docs/diagrams.uml)
-· [Protocolo e escolhas](docs/decisoes.md) · [Métricas completas](reports/metrics.json)
+Teste com 16.988 avaliações de produtos que não aparecem no treino.
 
-## Dados brasileiros, com origem
+| Medida | Resultado |
+|---|---:|
+| Macro-F1 do baseline | 0,4144 |
+| Macro-F1 do modelo | **0,9409** |
+| Erro classificando tudo | 4,88% |
+| Parcela classificada sem revisão | **89,93%** |
+| Erro nessa parcela | **1,90%** |
 
-Os textos são do **B2W-Reviews01 / Americanas, de 2018**. A demo inclui três
-avaliações originais, com nota, produto e linha no CSV. Não são frases geradas.
-As [capturas e fontes](docs/fontes.md) mostram também a Americanas atual e a
-API de avaliações do Mercado Livre como contexto do problema, sem atribuir a
-elas resultados que não foram medidos.
+![Cobertura e erro](docs/images/cobertura.png)
 
-<details>
-<summary>Ver imagens, matriz de confusão e arquitetura</summary>
+## Decisões
 
-![Matriz de confusão real](docs/images/confusao.png)
-![Diagrama renderizado do diagrams.uml](docs/architecture.svg)
+- **TF-IDF + regressão logística:** treino em CPU e pesos fáceis de inspecionar.
+- **Divisão por produto:** evita avaliar o modelo nos mesmos produtos do treino.
+- **Revisão por limiar:** reduz o erro nas decisões automáticas; o limiar é
+  escolhido na validação.
 
-| Americanas — página real | Mercado Livre — documentação real |
-|---|---|
-| ![Americanas](docs/images/americanas.jpg) | ![Mercado Livre](docs/images/mercado-livre.jpg) |
+As notas definem as classes: 1 e 2 são negativas; 4 e 5 são positivas.
+Três estrelas fica fora do treino. O corpus é de 2018; o resultado se refere
+à base filtrada, após um desenvolvimento exploratório.
 
-![Crivo no celular](docs/images/crivo-mobile.jpg)
+[Protocolo](docs/decisoes.md) · [Métricas](reports/metrics.json)
+· [Erros](reports/errors.json) · [UML](docs/architecture.svg)
+· [diagrams.uml](docs/diagrams.uml)
 
-</details>
-
-**Limite importante:** notas são rótulos imperfeitos; três estrelas fica fora do
-treino binário. O modelo não foi validado para delivery nem para textos atuais.
-A limpeza global exclui conflitos de rótulo. [Ficha do modelo](docs/modelo.md).
-
-Código MIT. Corpus e derivados CC BY-NC-SA 4.0, de Real, Oshiro e Mafra / B2W Digital.
-[Atribuição e tratamento dos dados](docs/dados.md).
+Dados: [B2W-Reviews01](https://github.com/americanas-tech/b2w-reviews01),
+Real, Oshiro e Mafra / B2W Digital. CC BY-NC-SA 4.0. Código MIT.
