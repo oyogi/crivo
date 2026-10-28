@@ -24,7 +24,7 @@ def make_handler(bundle: dict):
             self.send_header("Cache-Control", "no-store")
             self.send_header("X-Content-Type-Options", "nosniff")
             self.send_header("Content-Security-Policy", "default-src 'self'; "
-                             "script-src 'unsafe-inline'; style-src 'unsafe-inline'; "
+                             "script-src 'unsafe-inline'; style-src 'self'; "
                              "base-uri 'none'; frame-ancestors 'none'")
             self.end_headers()
             self.wfile.write(body)
@@ -34,10 +34,16 @@ def make_handler(bundle: dict):
             self.respond(status, body, "application/json; charset=utf-8")
 
         def do_GET(self):
-            if self.path != "/":
+            routes = {
+                "/": ("demo.html", "text/html; charset=utf-8"),
+                "/exemplos": ("examples.html", "text/html; charset=utf-8"),
+                "/style.css": ("style.css", "text/css; charset=utf-8"),
+            }
+            if self.path not in routes:
                 self.json_response(404, {"erro": "rota não encontrada"})
                 return
-            self.respond(200, files("crivo").joinpath("demo.html").read_bytes(), "text/html; charset=utf-8")
+            filename, content_type = routes[self.path]
+            self.respond(200, files("crivo").joinpath(filename).read_bytes(), content_type)
 
         def do_POST(self):
             if self.path != "/predict":
@@ -73,7 +79,7 @@ def make_handler(bundle: dict):
 
 def serve(bundle: dict, port: int = 8000):
     with HTTPServer(("127.0.0.1", port), make_handler(bundle)) as server:
-        print(f"demo em http://127.0.0.1:{server.server_port} — ctrl+c para sair")
+        print(f"demo em http://127.0.0.1:{server.server_port}; ctrl+c para sair")
         try:
             server.serve_forever()
         except KeyboardInterrupt:

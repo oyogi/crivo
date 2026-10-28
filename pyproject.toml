@@ -19,7 +19,7 @@ crivo = "crivo.__main__:main"
 where = ["src"]
 
 [tool.setuptools.package-data]
-crivo = ["demo.html"]
+crivo = ["*.html", "*.css"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

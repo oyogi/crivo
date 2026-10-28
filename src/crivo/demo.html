@@ -1,95 +1,24 @@
 <!doctype html>
-<html lang="pt-BR">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Crivo · classificação de avaliações</title>
-<style>
-:root{color-scheme:light;--ink:#20252b;--muted:#59636e;--paper:#f4f5f6;--line:#cdd2d8;--blue:#164d80;--negative:#9a362e;--positive:#245f45}
-*{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font:14px/1.45 system-ui,sans-serif}main{max-width:1160px;margin:0 auto;padding:20px 24px}header{display:flex;align-items:baseline;gap:16px;border-bottom:2px solid var(--ink);padding-bottom:10px}h1{font-size:25px;line-height:1.2;margin:0;letter-spacing:-.035em}header p{margin:0;color:var(--muted)}h2{font-size:14px;margin:0 0 10px;font-weight:700}p{margin:8px 0}a{color:var(--blue);text-underline-offset:2px}button,textarea{font:inherit}button{cursor:pointer;border:1px solid #aeb6bf;border-radius:3px;padding:6px 11px;background:#fff;color:var(--ink)}button:hover{background:#edf1f5}button:disabled{cursor:wait;opacity:.6}button:focus-visible,textarea:focus-visible,a:focus-visible{outline:3px solid #72a5d3;outline-offset:2px}.primary{background:var(--blue);border-color:var(--blue);color:#fff;padding:7px 14px}.primary:hover{background:#103b64}.reference{margin:16px 0 20px}.reference table{background:#fff}table{width:100%;border-collapse:collapse;table-layout:fixed}caption{text-align:left;font-weight:650;margin-bottom:7px}th,td{padding:8px 10px;text-align:left;border-bottom:1px solid var(--line);vertical-align:top;overflow-wrap:anywhere}th{font-size:12px;color:var(--muted);font-weight:550}thead th{background:#ebedf0;border-top:1px solid var(--line)}.reference td{font:600 19px/1.3 ui-monospace,SFMono-Regular,Consolas,monospace;font-variant-numeric:tabular-nums}.note{font-size:12px;color:var(--muted)}.workspace{display:grid;grid-template-columns:minmax(0,1.16fr) minmax(0,1fr);gap:24px;align-items:start;border-top:1px solid var(--line);padding-top:16px}.workspace>section{min-width:0}label{display:block;font-weight:650;margin-bottom:7px}textarea{display:block;resize:vertical;width:100%;min-height:120px;padding:10px;border:1px solid #aab2bc;border-radius:3px;background:#fff;color:var(--ink)}.form-actions{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-top:9px}#origin{min-height:18px;margin:7px 0;font-size:12px;color:var(--muted)}.result-table th{width:93px;background:transparent;font-size:13px}.result-table td{padding-left:4px}.number{font-family:ui-monospace,SFMono-Regular,Consolas,monospace;font-variant-numeric:tabular-nums}#decision{font-weight:700}.positive{color:var(--positive)}.negative{color:var(--negative)}#reason{font-size:12px;color:var(--muted)}#terms{margin-top:15px}#terms th:last-child,#terms td:last-child{text-align:right;width:105px}#terms td{padding-top:6px;padding-bottom:6px}#empty{font-size:12px;color:var(--muted)}.examples{border-top:1px solid var(--line);padding-top:12px;margin-top:16px}.examples th:first-child{width:69%}.examples td{padding-top:10px;padding-bottom:10px}.examples .source{font-size:12px;color:var(--muted)}.examples button{font-size:12px;margin-top:6px}.sample-label{display:block;font-size:12px;font-weight:650;color:var(--muted);margin-bottom:3px}q{quotes:none}footer{border-top:1px solid var(--line);margin-top:19px;padding-top:9px;color:var(--muted);font-size:12px}footer p{margin:5px 0}#error{color:var(--negative);font-size:13px}[hidden]{display:none!important}@media(max-width:700px){main{padding:15px 14px}header{align-items:flex-start;gap:12px}header p{font-size:12px}.workspace{grid-template-columns:1fr;gap:20px}.reference td{font-size:16px}.reference th{font-size:11px}th,td{padding-left:7px;padding-right:7px}.examples th:first-child{width:62%}textarea{min-height:100px}.result-table th{width:100px}}
-@media(max-width:700px){.workspace>section[aria-label="entrada"]{display:contents}.workspace form{order:1}.workspace #result{order:2}.workspace .examples{order:3}}
-</style>
-</head>
-<body>
-<main>
-<header><h1>Crivo</h1><p>Classificador de avaliações em português<br>TF-IDF + regressão logística · execução local</p></header>
-<section class="reference" aria-label="métricas de referência">
-<table>
-<caption>Teste do experimento de referência</caption>
-<thead><tr><th scope="col">Avaliações no teste</th><th scope="col">Cobertura automática</th><th scope="col">Erro entre os aceitos</th></tr></thead>
-<tbody><tr><td>16.988</td><td>89,93%</td><td>1,90%</td></tr></tbody>
-</table>
-<p class="note">Notas 1–2 e 4–5; produtos separados do treino. Cobertura = parcela classificada sem revisão. Erro = previsões erradas apenas nessa parcela. São medidas desse teste, não garantias para novos textos ou outros modelos.</p>
-</section>
-<div class="workspace">
-<section aria-label="entrada">
-<form id="form">
-<label for="text">Texto da avaliação</label>
-<textarea id="text" name="text" maxlength="10000" aria-describedby="origin privacy" placeholder="Cole uma avaliação de produto…" required>O produto é completamente diferente da descrição e da foto. Não recomendo.</textarea>
-<p id="origin">Exemplo da base B2W · linha 79 · produto 27818579 · nota 1</p>
-<div class="form-actions"><button class="primary" id="submit" type="submit">Classificar</button><span id="privacy" class="note">Até 10 mil caracteres. O texto não é salvo.</span></div>
-<p id="error" role="alert" hidden></p>
-</form>
-<section class="examples" aria-labelledby="examples-title">
-<h2 id="examples-title">Exemplos reais da base</h2>
-<table>
-<thead><tr><th scope="col">Avaliação original</th><th scope="col">Origem e uso</th></tr></thead>
-<tbody>
-<tr><td><span class="sample-label">Elogio</span><q>Jogo de panelas excelente material, entrega a tempo, design muito bom.</q></td><td><div class="source">Linha 14 · produto 29302228<br>Nota original: 5</div><button type="button" data-example="bom" aria-label="usar exemplo de elogio">Usar texto</button></td></tr>
-<tr><td><span class="sample-label">Reclamação</span><q>O produto é completamente diferente da descrição e da foto. Não recomendo.</q></td><td><div class="source">Linha 79 · produto 27818579<br>Nota original: 1</div><button type="button" data-example="ruim" aria-label="usar exemplo de reclamação">Usar texto</button></td></tr>
-<tr><td><span class="sample-label">Avaliação mista</span><q>O produto é bom, mas um dos espelhos veio quebrado</q></td><td><div class="source">Linha 345 · produto 14738991<br>Nota original: 3</div><button type="button" data-example="misto" aria-label="usar exemplo de avaliação mista">Usar texto</button></td></tr>
-</tbody>
-</table>
-<p class="note">Textos completos, sem alteração. As linhas são as linhas físicas do CSV na <a href="https://github.com/americanas-tech/b2w-reviews01/blob/4639429ec698d7821fc99a0bc665fa213d9fcd5a/B2W-Reviews01.csv">revisão usada do B2W-Reviews01</a>. Estes exemplos ilustram a interface; não são um teste independente. A nota 3 não entra no treino binário.</p>
-</section>
-</section>
-<section id="result" aria-live="polite" aria-busy="false">
-<h2>Resultado</h2>
-<table class="result-table"><tbody>
-<tr><th scope="row">Decisão</th><td id="decision">Aguardando análise</td></tr>
-<tr><th scope="row">Motivo</th><td id="reason">Clique em Classificar para avaliar o texto.</td></tr>
-<tr><th scope="row">Score</th><td id="score" class="number">—</td></tr>
-<tr><th scope="row">Limiar</th><td id="threshold" class="number">—</td></tr>
-</tbody></table>
-<p class="note">Score = maior saída das duas classes. Não é uma probabilidade calibrada de acerto. Abaixo do limiar, a decisão vai para revisão.</p>
-<table id="terms" hidden><thead><tr><th scope="col">Termo</th><th scope="col">TF-IDF × peso</th></tr></thead><tbody id="term-rows"></tbody></table>
-<p id="empty" hidden>Nenhum termo reconhecido no vocabulário de treino.</p>
-<p id="explanation" class="note" hidden>Contribuição positiva puxa para a classe positiva; negativa, para a negativa. A soma com o intercepto compõe o logit. Isso descreve a conta do modelo, não uma relação causal.</p>
-</section>
-</div>
-
-<footer>
-<p>Dados: avaliações da Americanas, 2018 · B2W Digital · <a href="https://github.com/americanas-tech/b2w-reviews01">B2W-Reviews01</a> · <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/">CC BY-NC-SA 4.0</a>.</p>
-<p>O alvo vem das estrelas e pode discordar do texto. O score pode ser alto em um erro; vocabulário conhecido não garante assunto conhecido. Modelo sem validação para delivery ou decisões reais de atendimento. As métricas acima pertencem à execução de referência do repositório.</p>
-</footer>
-</main>
-<script>
-const examples={
- bom:{text:'Jogo de panelas excelente material, entrega a tempo, design muito bom.',line:14,product:'29302228',rating:5},
- ruim:{text:'O produto é completamente diferente da descrição e da foto. Não recomendo.',line:79,product:'27818579',rating:1},
- misto:{text:'O produto é bom, mas um dos espelhos veio quebrado',line:345,product:'14738991',rating:3}
-};
-const text=document.querySelector('#text');
-const origin=document.querySelector('#origin');
-function resetResult(){document.querySelector('#decision').textContent='Aguardando análise';document.querySelector('#reason').textContent='Classifique o texto atual para ver o resultado.';for(const id of ['score','threshold'])document.querySelector('#'+id).textContent='—';for(const id of ['terms','empty','explanation','error'])document.querySelector('#'+id).hidden=true;}
-for(const button of document.querySelectorAll('[data-example]')){button.addEventListener('click',()=>{const example=examples[button.dataset.example];text.value=example.text;origin.textContent=`Exemplo da base B2W · linha ${example.line} · produto ${example.product} · nota ${example.rating}`;resetResult();text.focus();});}
-text.addEventListener('input',()=>{origin.textContent='Texto editado. A nota original não é usada como entrada do modelo.';resetResult();});
-const format=(value,digits=2)=>new Intl.NumberFormat('pt-BR',{minimumFractionDigits:digits,maximumFractionDigits:digits}).format(value);
-const reasons={score_suficiente:'Score igual ou maior que o limiar escolhido na validação.',score_baixo:'Score abaixo do limiar. Encaminhar para revisão.',sem_vocabulario:'Sem termos reconhecidos. Encaminhar para revisão, mesmo com score alto.'};
-document.querySelector('#form').addEventListener('submit',async event=>{
- event.preventDefault();const button=document.querySelector('#submit');const error=document.querySelector('#error');const result=document.querySelector('#result');error.hidden=true;button.disabled=true;button.textContent='Calculando…';text.disabled=true;for(const exampleButton of document.querySelectorAll('[data-example]'))exampleButton.disabled=true;result.setAttribute('aria-busy','true');
+<html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Analisar · Crivo</title><link rel="stylesheet" href="/style.css"></head>
+<body><div class="shell"><header><a class="brand" href="/">crivo<span>avaliações em português</span></a><nav aria-label="Navegação"><a href="/" aria-current="page">Analisar</a><a href="/exemplos" >Exemplos</a></nav></header><main><form id="form"><label for="text">Texto da avaliação</label><textarea id="text" maxlength="10000" placeholder="Escreva ou cole uma avaliação…" required></textarea><div class="actions"><small>Ctrl + Enter para analisar</small><button id="submit" type="submit">Analisar</button></div><p id="error" role="alert" hidden></p></form>
+<section class="result" id="result" aria-live="polite" hidden><p class="eyebrow">Resultado</p><h1 id="decision"></h1><p id="reason" hidden></p><details id="analysis"><summary>Ver análise</summary><div class="stats"><div>Score<span id="score"></span></div><div>Limiar<span id="threshold"></span></div></div><table id="terms"><thead><tr><th scope="col">Termo</th><th scope="col">Peso</th></tr></thead><tbody id="term-rows"></tbody></table></details></section></main><footer><span><a href="https://github.com/americanas-tech/b2w-reviews01">B2W-Reviews01</a> · Americanas, 2018</span><a href="https://github.com/oyogi/crivo">GitHub ↗</a></footer></div><script>
+const form=document.querySelector('#form'),text=document.querySelector('#text'),button=document.querySelector('#submit'),result=document.querySelector('#result'),error=document.querySelector('#error');
+const format=value=>new Intl.NumberFormat('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:4}).format(value);
+text.addEventListener('input',()=>{result.hidden=true;error.hidden=true;});
+text.addEventListener('keydown',event=>{if((event.ctrlKey||event.metaKey)&&event.key==='Enter'){event.preventDefault();if(!button.disabled)form.requestSubmit();}});
+form.addEventListener('submit',async event=>{
+ event.preventDefault();const submitted=text.value;button.disabled=true;text.disabled=true;button.textContent='Analisando…';error.hidden=true;result.hidden=true;result.setAttribute('aria-busy','true');
  try{
-  const response=await fetch('/predict',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({text:text.value})});
-  const data=await response.json();if(!response.ok)throw new Error(data.erro||'Não consegui avaliar esse texto.');
-  result.dataset.decision=data.decisao;
-  document.querySelector('#decision').textContent={negativa:'Negativa',positiva:'Positiva',revisar:'Revisar'}[data.decisao];
-  document.querySelector('#reason').textContent=reasons[data.motivo];document.querySelector('#score').textContent=format(data.score,4);document.querySelector('#threshold').textContent=format(data.limiar);
+  const response=await fetch('/predict',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({text:submitted})});
+  const data=await response.json();if(!response.ok)throw new Error(data.erro||'Não foi possível analisar. Tente novamente.');
+  result.dataset.decision=data.decisao;document.querySelector('#decision').textContent={positiva:'Positiva',negativa:'Negativa',revisar:'Revisar'}[data.decisao];
+  const reason=document.querySelector('#reason');reason.hidden=data.decisao!=='revisar';reason.textContent=data.motivo==='sem_vocabulario'?'Nenhum termo reconhecido.':'O score ficou abaixo do limiar.';
+  document.querySelector('#score').textContent=format(data.score);document.querySelector('#threshold').textContent=format(data.limiar);
   const rows=document.querySelector('#term-rows');rows.replaceChildren();
-  for(const term of data.termos){const row=document.createElement('tr');const name=document.createElement('td');const weight=document.createElement('td');name.textContent=term.termo;weight.textContent=(term.peso>0?'+':'')+format(term.peso,4);weight.className='number '+(term.peso>0?'positive':'negative');row.append(name,weight);rows.append(row);}
-  document.querySelector('#terms').hidden=data.termos.length===0;document.querySelector('#empty').hidden=data.termos.length>0;document.querySelector('#explanation').hidden=false;
- }catch(problem){error.textContent=problem.message;error.hidden=false;document.querySelector('#decision').textContent='Não calculado';document.querySelector('#reason').textContent='Confira o texto e tente novamente.';document.querySelector('#score').textContent='—';document.querySelector('#threshold').textContent='—';document.querySelector('#terms').hidden=true;document.querySelector('#empty').hidden=true;document.querySelector('#explanation').hidden=true;}
- finally{button.disabled=false;text.disabled=false;for(const exampleButton of document.querySelectorAll('[data-example]'))exampleButton.disabled=false;button.textContent='Classificar';result.setAttribute('aria-busy','false');}
+  for(const term of data.termos){const row=document.createElement('tr'),name=document.createElement('td'),weight=document.createElement('td');name.textContent=term.termo;weight.textContent=(term.peso>0?'+':'')+format(term.peso);weight.className=term.peso>0?'positive':'negative';row.append(name,weight);rows.append(row);}
+  document.querySelector('#terms').hidden=data.termos.length===0;document.querySelector('#analysis').open=false;result.hidden=false;
+ }catch(problem){error.textContent=problem.message;error.hidden=false;}
+ finally{button.disabled=false;text.disabled=false;button.textContent='Analisar';result.setAttribute('aria-busy','false');}
 });
-</script>
-</body>
-</html>
+try{const selected=sessionStorage.getItem('crivo-example');if(selected){text.value=selected;sessionStorage.removeItem('crivo-example');form.requestSubmit();}}catch{}
+</script></body></html>

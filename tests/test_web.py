@@ -113,17 +113,28 @@ def test_body_limit_is_inclusive_and_length_allows_leading_zeroes(handler):
     assert status == 200
 
 
-def test_reference_metrics_and_real_examples_are_identified(handler):
+def test_examples_are_on_their_own_page(handler):
     _, _, response = request(handler, "GET", "/")
     html = response.decode()
-    assert "16.988" in html
-    assert "89,93%" in html
-    assert "1,90%" in html
-    assert "produtos separados do treino" in html
-    assert "não garantias" in html
-    assert "linha 79" in html
-    assert "Linha 14 · produto 29302228" in html
-    assert "Linha 345 · produto 14738991" in html
-    assert "4639429ec698d7821fc99a0bc665fa213d9fcd5a/B2W-Reviews01.csv" in html
-    assert "CC BY-NC-SA 4.0" in html
-    assert "exemplos inventados" not in html
+    assert 'href="/exemplos"' in html
+    assert "16.988" not in html
+    assert "89,93%" not in html
+    assert "1,90%" not in html
+    assert "Jogo de panelas" not in html
+    status, _, response = request(handler, "GET", "/exemplos")
+    assert status == 200
+    examples = response.decode()
+    assert "Linha 14" in examples
+    assert "Linha 79" in examples
+    assert "Linha 345" in examples
+    assert "Produto 29302228" in examples
+    assert "4639429ec698d7821fc99a0bc665fa213d9fcd5a/B2W-Reviews01.csv" in examples
+    assert "CC BY-NC-SA 4.0" in examples
+
+
+def test_shared_stylesheet_is_served(handler):
+    status, headers, response = request(handler, "GET", "/style.css")
+    assert status == 200
+    assert b"text/css; charset=utf-8" in headers
+    assert b"style-src 'self'" in headers
+    assert b".shell" in response
