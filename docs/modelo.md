@@ -1,6 +1,6 @@
 # Modelo
 
-Crivo 0.2.0. TF-IDF com até 40 mil features e regressão logística.
+Crivo 0.3.0. TF-IDF com até 100 mil features e regressão logística.
 
 | Entrada | Saída |
 |---|---|
@@ -25,7 +25,7 @@ score alto. O corpus é de 2018 e o modelo não foi avaliado em delivery.
 O split não isola autores ou datas. O protocolo é exploratório;
 [detalhes da avaliação](decisoes.md).
 
-O pickle da [release](https://github.com/oyogi/crivo/releases/tag/v0.2.0)
+O pickle da [release](https://github.com/oyogi/crivo/releases/tag/v0.3.0)
 corresponde ao modelo avaliado. Carregue apenas pickles de origem confiável.
 As versões e o hash estão nos metadados da release.
 

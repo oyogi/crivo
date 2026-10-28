@@ -15,8 +15,8 @@ skinparam ArrowColor #555555
 start
 partition "treino e avaliação" {
   :B2W-Reviews01 + SHA-256\nlimpeza e divisão por produto (70/15/15);
-  :treino: ajustar TF-IDF e regressões\nC = 0.5, 2, 8;
-  :validação: escolher C pelo macro-F1\ne limiar por erro × cobertura;
+  :treino: comparar 6 configurações\npalavras, trigramas e caracteres;
+  :validação: escolher modelo pelo macro-F1\ne limiar por erro × cobertura;
   :teste: avaliar modelo e limiar congelados\nnota 3: apenas diagnóstico;
   :salvar modelo, limiar,\nmétricas e sinais de referência;
 }
@@ -29,7 +29,7 @@ partition "inferência local" {
   else (não)
     :encaminhar para revisão;
   endif
-  :mostrar decisão, score\ne contribuições dos termos;
+  :mostrar decisão\nanálise detalhada opcional;
 }
 stop
 @enduml
