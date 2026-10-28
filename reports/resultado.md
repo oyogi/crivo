@@ -31,6 +31,6 @@ nota, e rejeitar poucos textos desse grupo expõe uma limitação da política.
 
 [Curva de cobertura e erro](risk_coverage.csv) · [Erros de score alto](errors.json)
 
-Os erros apontam a linha do CSV original, sem copiar avaliações para o Git.
+Os erros apontam o registro do CSV original, contando o cabeçalho, sem copiar avaliações para o Git.
 O relatório também traz métricas separadas por textos de até cinco palavras
 e textos mais longos. Esses recortes são diagnósticos, sem retreino por recorte.
