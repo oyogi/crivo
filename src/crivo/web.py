@@ -2,7 +2,7 @@
 
 import json
 import socket
-from http.server import BaseHTTPRequestHandler, HTTPServer
+from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from importlib.resources import files
 
 from .model import predict
@@ -27,7 +27,10 @@ def make_handler(bundle: dict):
                              "script-src 'unsafe-inline'; style-src 'self'; "
                              "base-uri 'none'; frame-ancestors 'none'")
             self.end_headers()
-            self.wfile.write(body)
+            try:
+                self.wfile.write(body)
+            except (BrokenPipeError, ConnectionResetError):
+                pass
 
         def json_response(self, status: int, value: dict):
             body = json.dumps(value, ensure_ascii=False, allow_nan=False).encode("utf-8")
@@ -78,7 +81,7 @@ def make_handler(bundle: dict):
 
 
 def serve(bundle: dict, port: int = 8000):
-    with HTTPServer(("127.0.0.1", port), make_handler(bundle)) as server:
+    with ThreadingHTTPServer(("127.0.0.1", port), make_handler(bundle)) as server:
         print(f"demo em http://127.0.0.1:{server.server_port}; ctrl+c para sair")
         try:
             server.serve_forever()

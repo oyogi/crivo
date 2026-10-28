@@ -1,24 +1,36 @@
 <!doctype html>
 <html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Analisar · Crivo</title><link rel="stylesheet" href="/style.css"></head>
-<body><div class="shell"><header><a class="brand" href="/">crivo<span>avaliações em português</span></a><nav aria-label="Navegação"><a href="/" aria-current="page">Analisar</a><a href="/exemplos" >Exemplos</a></nav></header><main><form id="form"><label for="text">Texto da avaliação</label><textarea id="text" maxlength="10000" placeholder="Escreva ou cole uma avaliação…" required></textarea><div class="actions"><small>Ctrl + Enter para analisar</small><button id="submit" type="submit">Analisar</button></div><p id="error" role="alert" hidden></p></form>
+<body><div class="shell"><header><a class="brand" href="/">crivo<span>avaliações em português</span></a><nav aria-label="Navegação"><a href="/" aria-current="page">Analisar</a><a href="/exemplos" >Exemplos</a></nav></header><main><form id="form"><div class="field-heading"><label for="text">Texto da avaliação</label><span id="count" class="count">0 / 10.000</span></div><textarea id="text" maxlength="10000" aria-describedby="count" placeholder="Escreva ou cole uma avaliação…" required></textarea><div class="actions"><small>Ctrl + Enter para analisar</small><div class="action-buttons"><button id="clear" class="quiet" type="button" disabled>Limpar</button><button id="submit" type="submit" disabled>Analisar</button></div></div><p id="error" role="alert" hidden></p></form>
 <section class="result" id="result" aria-live="polite" hidden><p class="eyebrow">Resultado</p><h1 id="decision"></h1><p id="reason" hidden></p><details id="analysis"><summary>Ver análise</summary><div class="stats"><div>Score<span id="score"></span></div><div>Limiar<span id="threshold"></span></div></div><table id="terms"><thead><tr><th scope="col">Termo</th><th scope="col">Peso</th></tr></thead><tbody id="term-rows"></tbody></table></details></section></main><footer><span><a href="https://github.com/americanas-tech/b2w-reviews01">B2W-Reviews01</a> · Americanas, 2018</span><a href="https://github.com/oyogi/crivo">GitHub ↗</a></footer></div><script>
-const form=document.querySelector('#form'),text=document.querySelector('#text'),button=document.querySelector('#submit'),result=document.querySelector('#result'),error=document.querySelector('#error');
+const form=document.querySelector('#form'),text=document.querySelector('#text'),button=document.querySelector('#submit'),clear=document.querySelector('#clear'),result=document.querySelector('#result'),error=document.querySelector('#error');
 const format=value=>new Intl.NumberFormat('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:4}).format(value);
-text.addEventListener('input',()=>{result.hidden=true;error.hidden=true;});
-text.addEventListener('keydown',event=>{if((event.ctrlKey||event.metaKey)&&event.key==='Enter'){event.preventDefault();if(!button.disabled)form.requestSubmit();}});
+const countFormat=new Intl.NumberFormat('pt-BR');
+let controller=null,generation=0;
+function ready(){button.disabled=!text.value.trim();clear.disabled=!text.value.length;button.textContent='Analisar';form.setAttribute('aria-busy','false');}
+function updateCount(){document.querySelector('#count').textContent=countFormat.format(text.value.length)+' / 10.000';}
+function cancel(){generation++;if(controller)controller.abort();controller=null;ready();}
+text.addEventListener('input',()=>{cancel();updateCount();result.hidden=true;error.hidden=true;});
+clear.addEventListener('click',()=>{cancel();text.value='';updateCount();ready();result.hidden=true;error.hidden=true;text.focus();});
+text.addEventListener('keydown',event=>{
+ if((event.ctrlKey||event.metaKey)&&event.key==='Enter'){event.preventDefault();if(!button.disabled)form.requestSubmit();}
+ if(event.key==='Escape'&&controller){event.preventDefault();cancel();}
+});
 form.addEventListener('submit',async event=>{
- event.preventDefault();const submitted=text.value;button.disabled=true;text.disabled=true;button.textContent='Analisando…';error.hidden=true;result.hidden=true;result.setAttribute('aria-busy','true');
+ event.preventDefault();if(!text.value.trim())return;
+ if(controller)controller.abort();controller=new AbortController();const current=++generation,submitted=text.value;
+ button.disabled=true;button.textContent='Analisando…';error.hidden=true;result.hidden=true;form.setAttribute('aria-busy','true');
  try{
-  const response=await fetch('/predict',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({text:submitted})});
-  const data=await response.json();if(!response.ok)throw new Error(data.erro||'Não foi possível analisar. Tente novamente.');
+  const response=await fetch('/predict',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({text:submitted}),signal:controller.signal});
+  const data=await response.json();if(current!==generation)return;if(!response.ok)throw new Error(data.erro||'Não foi possível analisar. Tente novamente.');
   result.dataset.decision=data.decisao;document.querySelector('#decision').textContent={positiva:'Positiva',negativa:'Negativa',revisar:'Revisar'}[data.decisao];
   const reason=document.querySelector('#reason');reason.hidden=data.decisao!=='revisar';reason.textContent=data.motivo==='sem_vocabulario'?'Nenhum termo reconhecido.':'O score ficou abaixo do limiar.';
   document.querySelector('#score').textContent=format(data.score);document.querySelector('#threshold').textContent=format(data.limiar);
   const rows=document.querySelector('#term-rows');rows.replaceChildren();
   for(const term of data.termos){const row=document.createElement('tr'),name=document.createElement('td'),weight=document.createElement('td');name.textContent=term.termo;weight.textContent=(term.peso>0?'+':'')+format(term.peso);weight.className=term.peso>0?'positive':'negative';row.append(name,weight);rows.append(row);}
   document.querySelector('#terms').hidden=data.termos.length===0;document.querySelector('#analysis').open=false;result.hidden=false;
- }catch(problem){error.textContent=problem.message;error.hidden=false;}
- finally{button.disabled=false;text.disabled=false;button.textContent='Analisar';result.setAttribute('aria-busy','false');}
+ }catch(problem){if(current!==generation||problem.name==='AbortError')return;error.textContent=problem.message;error.hidden=false;}
+ finally{if(current===generation){controller=null;ready();}}
 });
-try{const selected=sessionStorage.getItem('crivo-example');if(selected){text.value=selected;sessionStorage.removeItem('crivo-example');form.requestSubmit();}}catch{}
+updateCount();ready();
+try{const selected=sessionStorage.getItem('crivo-example');if(selected){text.value=selected;sessionStorage.removeItem('crivo-example');updateCount();ready();form.requestSubmit();}}catch{}
 </script></body></html>
